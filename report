@@ -1,0 +1,95 @@
+CS3101 P1 Report
+Student ID: 240030041
+
+Assumptions:
+Relation between train and service
+
+Since no explicit relation is mentioned, we can assume either a many to many, a one to many, or a one to one relationship.
+Looking at real life railway service databases, we can assume a relationship between service and train.
+
+Given that services are valid between two dates and run every day, a one-to-many is probably more appropriate. This assumes that a specific train is assigned to operate a specific service throughout its validity period.
+
+
+
+Conversion of ER Model to Relational Model
+Relational Schemata
+1. Strong Entity Sets
+
+location (name)
+train (unit_id)
+feature (feature_id, description)
+service (headcode, valid_from_date, valid_to_date, origin*, destination*, train_id*)
+Foreign keys: 
+	origin references location(name),
+	destination references location(name),
+	train_id references train(unit_id)
+location (name: varchar(50))
+train (unit_id: varchar(20))
+feature (feature_id: integer, description: varchar(100))
+service (headcode: varchar(20), valid_from_date: date, valid_to_date: date, origin*: varchar(50), destination*: varchar(50), train_id*: varchar(20))
+
+2. Weak Entity Sets
+carriage (train_id*, letter)
+Foreign key: train_id references train(unit_id)
+carriage (train_id*: varchar(20), letter: char(1))
+
+3. Subclass Entities
+station (name*, station_code)
+Foreign key: name references location(name)
+station (name*: varchar(50), station_code: char(3))
+4. Many-to-Many Relationships
+carriage_feature (train_id*, letter*, feature_id*)
+Foreign keys: 
+	(train_id, letter) references carriage(train_id, letter),
+	feature_id references feature(feature_id)
+carriage_feature (train_id*: varchar(20), letter*: char(1), feature_id*: integer)
+
+service_location (headcode*: varchar(20), location_name*: varchar(50), sequence_number: integer, arrival_time: time NULL, departure_time: time NOT NULL, platform: varchar(10) NULL, stops: boolean NOT NULL)
+Foreign keys:
+	headcode references service(headcode),
+	location_name references location(name)
+
+Functional Dependencies and Normal Forms
+1. location
+Functional Dependencies:
+name → {} (trivial)
+Candidate Key: name
+Normal Form: BCNF (The only FDs are trivial or on the primary key)
+2. station
+Functional Dependencies:
+name → station_code
+station_code → name
+Candidate Keys: name, station_code (both are unique identifiers)
+Normal Form: BCNF (All determinants are candidate keys)
+3. train
+Functional Dependencies:
+unit_id → {} (trivial)
+Candidate Key: unit_id
+Normal Form: BCNF (The only FDs are trivial or on the primary key)
+4. carriage
+Functional Dependencies:
+train_id, letter → {} (trivial)
+Candidate Key: (train_id, letter)
+Normal Form: BCNF (The only FDs are trivial or on the primary key)
+5. feature
+Functional Dependencies:
+feature_id → description
+Candidate Key: feature_id
+Normal Form: BCNF (All determinants are candidate keys)
+6. service
+Functional Dependencies:
+headcode → valid_from_date, valid_to_date, origin, destination, train_id
+Candidate Key: headcode
+Normal Form: BCNF (All determinants are candidate keys)
+7. carriage_feature
+Functional Dependencies:
+train_id, letter, feature_id → {} (trivial)
+Candidate Key: (train_id, letter, feature_id)
+Normal Form: BCNF (The only FDs are trivial or on the primary key)
+8. service_location
+Functional Dependencies:
+headcode, location_name, sequence_number → arrival_time, departure_time, platform, stops
+headcode, sequence_number → location_name (The sequence number uniquely determines which location is at that position in the route)
+Candidate Key: (headcode, location_name, sequence_number) and (headcode, sequence_number)
+Normal Form: BCNF (All determinants are candidate keys)
+
